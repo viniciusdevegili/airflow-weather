@@ -1,10 +1,9 @@
-version: '3.8'
 services:
   airflow-webserver:
     image: apache/airflow:2.8.1
     restart: always
     environment:
-      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
       - AIRFLOW__CORE__FERNET_KEY=${FERNET_KEY}
       - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=True
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
@@ -13,6 +12,7 @@ services:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
+      - airflow_db:/opt/airflow
     ports:
       - "8080:8080"
     command: webserver
@@ -23,10 +23,14 @@ services:
     image: apache/airflow:2.8.1
     restart: always
     environment:
-      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
+      - airflow_db:/opt/airflow
     command: scheduler
+
+volumes:
+  airflow_db:
